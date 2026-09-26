@@ -1,70 +1,108 @@
-<<<<<<< HEAD
-# cpp-iot-greenhouse
-A high-performance C++17 IoT Edge simulation that runs hardware-free using POSIX sockets. Simulates a smart greenhouse streaming real-time sensor metrics (Temp, Humidity) to a TCP server with bidirectional actuator controls. Built with modern CMake, multi-threading, and zero physical dependencies—perfect for rapid edge testing.
-=======
-# Hardware-Abstracted IoT Virtual Greenhouse System
+# Decoupled Hardware-Abstracted IoT Greenhouse System
 
-A high-performance, professional **C++17 IoT Edge Engine Simulation** that runs seamlessly on any Linux ( possibly macOS - Not tested ) environment without needing physical microcontrollers (like the STM32F401). 
+A high-performance C++17 IoT Distributed Engine Simulation tracking asynchronous network telemetry patterns. This system isolates edge device firmware loops from the central aggregator infrastructure, eliminating physical hardware dependencies (such as an STM32F401 microcontroller) for rapid testing.
 
-This project demonstrates a production-ready, multi-threaded TCP socket architecture that decouples physical sensor registers from edge computing logic. It allows teams to test edge business rules, data formatting, and remote actuator control pipelines inside a completely virtualized hardware layer.
+Instead of running a single monolithic loop, this repository splits execution across two distinct, multi-threaded binary executables communicating over a standardized network socket protocol.
 
 ---
 
-## ✨ Features
-* **Hardware Co-Simulation Layer:** Object-oriented mock layer simulating dynamic environmental changes (Temperature, Humidity) using dynamic state models rather than hardware blocks.
-* **Multi-Threaded Socket Server:** High-performance POSIX networking layer capable of streaming metrics to multiple remote dashboards or client interfaces simultaneously.
-* **Bidirectional Actuator Controls:** Fully interactive runtime commands allow remote network endpoints to pass signals down to the virtual physical engine.
-* **Modern Build Configuration:** Powered by CMake for easy cross-platform compilation.
+## 🏗️ Architecture Design
+
+[ EdgeDeviceClient Node ]                   [ CentralServer Gateway ]
+(Simulates STM32 Hardware)                  (Cloud Gateway / Host PC)
+||
+| -------- 1. Dial-Out Connection --------> | (Accepts Socket on 8080)
+||
+| -------- 2. 1Hz JSON Telemetry Stream --> | (Parses & Logs Metrics)
+||
+| <------- 3. Bidirectional Actuator ------ | (Dispatches Over-The-Air)
+
+1. **The Edge Node (`EdgeDeviceClient`):** Mirrors an on-field microcontroller operating behind an isolated local network. Configured as a TCP Client, it dials outward to a static infrastructure gateway, tracking environmental state physics natively while waiting for bidirectional actuator command words (`FAN_ON` / `FAN_OFF`).
+2. **The Cloud Aggregator (`CentralServer`):** Runs as a persistent asynchronous POSIX TCP Server. It opens port `8080`, dispatches a dedicated detached operating system thread for every registering hardware device, and acts as the central command telemetry terminal.
 
 ---
 
-## 🛠️ Prerequisites & Installation
+## 📊 Network Data Protocol (JSON Payload)
 
-### Fedora / RedHat-based Linux
+The systems decouple completely by transmitting serialized JSON strings over live TCP streams rather than sharing internal C++ memory objects:
+
+```json
+{
+  "temp": 24.10,
+  "hum": 57.00,
+  "fan": false
+}
+```
+
+---
+
+## 📁 Repository Structure
+
+```text
+.
+├── CMakeLists.txt              # Multi-target modern CMake configuration
+├── README.md                   # System operational guide
+├── include/                    # Decoupled interface headers
+│   ├── CentralServer.hpp
+│   └── EdgeDeviceClient.hpp
+└── src/                        # Modular application execution source code
+    ├── CentralServer.cpp
+    └── EdgeDeviceClient.cpp
+```
+
+---
+
+## 🛠️ Prerequisites & Compilation
+
+Ensure your Linux environment contains a modern development toolchain and compilation suite.
+
+### Fedora / RedHat-based Distributions
 ```bash
 sudo dnf groupinstall -y "Development Tools"
 sudo dnf install -y cmake gdb
 ```
 
-### Ubuntu / Debian-based Linux
+### Building the Project
+Generate and build both target executable binaries simultaneously using standard out-of-source CMake workflows:
+
 ```bash
-sudo apt update
-sudo apt install -y build-essential cmake gdb
+# 1. Access or create your local workspace build cache
+mkdir -p build && cd build
+
+# 2. Reset the cache and map project configurations
+rm -rf *
+cmake ..
+
+# 3. Compile all distributed software instances 
+make
 ```
 
 ---
 
-## ⚙️ Compilation & Build
+## 🚀 Step-by-Step Execution Guide
 
-Compile the production binary cleanly using the native CMake toolchain:
+To run this distributed framework, open **two distinct terminal windows or tabs**.
 
+### 1. Fire Up the Infrastructure Gateway
+Always boot up the centralized tracking receiver node first so the local socket layer bounds correctly:
 ```bash
-# 1. Configure the project and prepare the build environment
-cmake -B build -S .
-
-# 2. Compile the binaries
-cmake --build build
+cd build/
+./CentralServer
 ```
+*Console output indicates the port listener loop has locked onto active service pathways:*
+> `🖥️ Central IoT Aggregator Gateway listening on port 8080...`
+
+### 2. Boot Up the Virtual STM32 Microcontroller Node
+In a separate terminal space, launch your edge hardware instance:
+```bash
+cd build/
+./EdgeDeviceClient
+```
+*The client application handles automated handshake retry procedures until connectivity hooks succeed:*
+> `📡 STM32 Virtual Edge Device Booting...`
+> `🚀 Connected to Central Server! Telemetry streaming...`
 
 ---
 
-## 🚀 Live Demonstration Guide
-
-### 1. Launch the IoT Server Node
-Start the core application node on your system:
-```bash
-./build/IoT_Greenhouse
-```
-*The server will initialize and begin listening for TCP dashboard client handshakes on port `8080`.*
-
-### 2. Connect Your Client Dashboard
-Simulate an active client connection or dashboard monitoring tool in a separate terminal using `netcat`:
-```bash
-nc localhost 8080
-```
-
-### 3. Interactive Actuator Control
-While telemetry data is streaming live, you can send manual over-the-network commands straight to the edge device. Type the following commands into your active `netcat` session and press **Enter**:
-* `FAN_ON`  — Turns on the greenhouse cooling mechanism. You will see the temperature stream begin dropping step-by-step.
-* `FAN_OFF` — Shuts down the ventilation system, allowing internal environmental temperatures to rise again.
->>>>>>> 26e4361 (Initial commit: Complete C++ greenhouse network engine)
+## 📜 License
+This project is open-source and available under the [MIT License](LICENSE).
