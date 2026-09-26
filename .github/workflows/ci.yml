@@ -1,6 +1,5 @@
 name: C++ CMake CI
 
-# Trigger this pipeline on every git push or pull request to the main branch
 on:
   push:
     branches: [ main ]
@@ -9,26 +8,22 @@ on:
 
 jobs:
   build-fedora:
-    # Use a container environment that mimics your Fedora system
     runs-on: ubuntu-latest
     container:
       image: fedora:44
 
     steps:
-    # 1. Pull down the source code from the repository
     - name: Checkout Code
       uses: actions/checkout@v4
 
-    # 2. Install compiling tools inside the fresh Fedora container
+    # FIX: Updated to support Fedora's new dnf5 group syntax
     - name: Install Build Dependencies
       run: |
-        dnf groupinstall -y "Development Tools"
+        dnf group install -y "Development Tools"
         dnf install -y cmake
 
-    # 3. Prepare the build directory (Matches what you did locally)
     - name: Configure CMake
       run: cmake -B build -S .
 
-    # 4. Compile the application to check for any hidden C++ compiler errors
     - name: Build Project
       run: cmake --build build
