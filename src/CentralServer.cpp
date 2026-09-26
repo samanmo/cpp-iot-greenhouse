@@ -33,9 +33,28 @@ bool CentralServer::init() {
     return true;
 }
 
+// ⌨️ NEW FEATURE: This loop runs on its own thread looking for your terminal input
+void CentralServer::userInputLoop(int clientSocket) {
+    std::string inputCommand;
+    while (true) {
+        std::getline(std::cin, inputCommand); // Wait for you to type something and hit Enter
+        
+        if (inputCommand == "FAN_ON" || inputCommand == "FAN_OFF") {
+            send(clientSocket, inputCommand.c_str(), inputCommand.length(), 0);
+            std::cout << "🎮 [MANUAL OVERRIDE] Sent command: " << inputCommand << "\n";
+        } else {
+            std::cout << "⚠️ Invalid command. Type 'FAN_ON' or 'FAN_OFF'\n";
+        }
+    }
+}
+
 void CentralServer::handleClient(int clientSocket) {
-    char buffer[1024] = {0};
+    char buffer[1024] = {0}; //  Clean 1024-byte character array
     std::cout << "🔌 Remote Edge Device checked in. Tracking telemetry...\n";
+    std::cout << "⌨️  MANUAL MODE ACTIVE: Type 'FAN_ON' or 'FAN_OFF' at any time and hit Enter.\n\n";
+
+    // 🚀 Spawn a dedicated thread just to watch your keyboard inputs
+    std::thread(userInputLoop, clientSocket).detach();
 
     while (true) {
         memset(buffer, 0, sizeof(buffer));
@@ -46,7 +65,7 @@ void CentralServer::handleClient(int clientSocket) {
             break;
         }
 
-        std::cout << "📥 Inbound Data: " << buffer;
+        std::cout << "📥 Telemetry: " << buffer;
     }
     close(clientSocket);
 }

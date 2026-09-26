@@ -7,6 +7,8 @@ private:
     int m_port;
 
     static void handleClient(int clientSocket);
+    // ⌨️ Add this new declaration for keyboard tracking
+    static void userInputLoop(int clientSocket); 
 
 public:
     CentralServer(int port);
