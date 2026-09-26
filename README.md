@@ -7,6 +7,18 @@ This project simulates an IoT smart greenhouse by separating the edge device har
 * **`src/`**: Implementation files (`CentralServer.cpp`, `EdgeDeviceClient.cpp`)
 * **`CMakeLists.txt`**: Build configuration script
 
+├── build
+├── CMakeLists.txt
+├── include
+│   ├── CentralServer.hpp
+│   └── EdgeDeviceClient.hpp
+├── LICENSE
+├── LICENSE.txt
+├── README.md
+└── src
+    ├── CentralServer.cpp
+    └── EdgeDeviceClient.cpp
+
 ---
 
 ## 🛠️ How to Compile
